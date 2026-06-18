@@ -6,3 +6,8 @@ node_modules/
 .env.local
 .env.production
 
+#Dependencies
+node_modules/
+
+
+package-lock.json
