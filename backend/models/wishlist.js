@@ -4,7 +4,7 @@ const mongoose = require("mongoose")
 Key design decision: Each wishlist item is its own document, not an array inside User. Here's why — a user with 50 wishlist items stored as an array means loading all 50 every time you need just one. With separate documents you can query, sort, and paginate efficiently.
 */
 
-const wishListSchema = new mongoose.Schema({
+const wishlistSchema = new mongoose.Schema({
     
     // References
     userId : {
@@ -77,20 +77,18 @@ const wishListSchema = new mongoose.Schema({
 // Indexes
 
 // get all wishlist items for this user
-wishListSchema.index({userId : 1, addedAt : -1});
+wishlistSchema.index({userId : 1, addedAt : -1});
 
 // Prevent duplicate wishlist entries
-wishListSchema.index({userId : 1, productId : 1}, {unique : true});
+wishlistSchema.index({userId : 1, productId : 1}, {unique : true});
 
-// For share link lookup
-wishListSchema.index({shareToken : 1});
 
 // BullMQ worker- find all public wishlists to update hints
-wishListSchema.index({isPublic : 1});
+wishlistSchema.index({isPublic : 1});
 
 // Virtual Fields- how much the price changes since wishlisting
 
-wishListSchema.virtual("priceChange").get(function(){
+wishlistSchema.virtual("priceChange").get(function(){
     if(!this.priceWhenAdded || !this.currentPrice) return null;
     return this.currentPrice-this.priceWhenAdded;
 });

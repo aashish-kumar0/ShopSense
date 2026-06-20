@@ -62,6 +62,8 @@ app.use("/api", limiter);
 // Routes
 app.use("/api/health", healthRoutes);
 
+app.use("/api/auth", require("./routes/auth.routes"))
+
 
 // 404 error handler
 app.use((req, res) => {

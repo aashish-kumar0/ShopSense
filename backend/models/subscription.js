@@ -141,7 +141,7 @@ subscriptionSchema.virtual("daysRemaining").get(function () {
 
 // ─── Pre-save hook ────────────────────────────────────────────
 // Auto-compute expiresAt based on billing cycle if not provided
-subscriptionSchema.pre("save", function (next) {
+subscriptionSchema.pre("validate", function (next) {
   if (!this.expiresAt && this.startDate) {
     const expiry = new Date(this.startDate);
     if (this.billingCycle === "yearly") {

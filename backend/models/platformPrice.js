@@ -22,7 +22,7 @@ const platformPriceSchema = new mongoose.Schema({
         required : [true, "Product refrence is required"],
     },
 
-    platformIdentity : {
+    platform : {
         type : String,
 
         required : [true, "Platform is required"],
