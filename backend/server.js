@@ -9,7 +9,9 @@ const validateEnv = require("./config/env");
 const connectDB = require("./config/db");
 const healthRoutes=require("./routes/health.routes")
 const rateLimit=require("express-rate-limit")
-
+const onboardingRoutes = require("./routes/onboarding.routes")
+const productRoutes = require("./routes/product.routes");
+const worker = require("./queues/workers/productIngestion.worker");
 
 
 // ─── Validate env vars before doing anything else ────────────────────────────
@@ -19,6 +21,13 @@ validateEnv();
 
 // Connection to MongoDB
 connectDB();
+
+// Initialize Pinecone
+const { initPinecone } = require("./services/rag/pinecone.service");
+initPinecone().catch((err) => {
+  console.error("❌ Pinecone initialization failed:", err.message);
+  process.exit(1);
+});
 
 // http.createServer wraps Express so we can attach Socket.io to the same port
 // If we used app.listen() directly, Socket.io would need a separate port — which is messy in production.
@@ -64,12 +73,20 @@ app.use("/api/health", healthRoutes);
 
 app.use("/api/auth", require("./routes/auth.routes"))
 
+app.use("/api/onboarding", onboardingRoutes);
+
+app.use("/api/products",productRoutes);
+
+
 
 // 404 error handler
 app.use((req, res) => {
   res.status(404).json({ success: false, message: `Route ${req.path} not found` });
 });
- 
+
+// Global error handler — MUST be last middleware
+const errorHandler = require("./middleware/error.middleware");
+app.use(errorHandler);
 
 
 // ─── Start server 

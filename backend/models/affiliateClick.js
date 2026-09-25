@@ -41,10 +41,16 @@ const affiliateClickSchema = new mongoose.Schema({
       min: [0, "Price cannot be negative"],
     },
 
+    productUrl : {
+      type : String,
+      trim : true,
+      default : null
+    },
+
     // The exact affiliate URL the user was sent to
     affiliateUrl: {
       type: String,
-      required: [true, "Affiliate URL is required"],
+      default : null,
       trim: true,
     },
 

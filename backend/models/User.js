@@ -127,7 +127,7 @@ const userSchema= new mongoose.Schema({
         healthGoals : {
             type : [String],
             enum : ["weight_loss", "muscle_gain", "diabetic_management", "general_health"],
-            default : [],
+            default : ["general_health"],
         },
 
         budgetRange : {

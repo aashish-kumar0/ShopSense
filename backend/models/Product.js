@@ -176,7 +176,8 @@ const productSchema = new mongoose.Schema({
         virtuals : true,
         transform : function(doc, ret){
             delete ret.__v;
-            delete ret;
+            delete ret._id;
+            return ret;
         },
     },
 }
@@ -193,6 +194,14 @@ productSchema.index({ name: "text", brand: "text", description: "text" });
 
 
 // ─── Virtuals ─────────────────────────────────────────────────
+
+// in Product model, after schema definition:
+productSchema.virtual("platformPrices", {
+  ref: "PlatformPrice",
+  localField: "_id",
+  foreignField: "productId",
+});
+
 productSchema.virtual("needsEnrichment").get(function () {
   if (!this.lastEnriched) return true;
   const hoursSince =

@@ -1,7 +1,7 @@
 const requiredVars = [
   "MONGODB_URI",
-//   "JWT_SECRET",
-//   "OPENAI_API_KEY",
+  "JWT_SECRET",
+  "GEMINI_API_KEY",
 ];
 
 // Called once at server startup — crashes early if anything is missing
