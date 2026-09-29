@@ -179,7 +179,7 @@ The seed script saved products to MongoDB but never indexed them in Pinecone, an
 ### 1. Clone
 
 ```bash
-git clone https://github.com/<your-username>/ShopSense.git
+git clone https://github.com/aashish-kumar0/ShopSense.git
 cd ShopSense
 ```
 
