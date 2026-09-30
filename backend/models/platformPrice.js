@@ -136,4 +136,26 @@ platformPriceSchema.pre("save",function(next){
   next();
 })
 
+// Same computation as pre("save"), but for findOneAndUpdate calls
+// (upserts from the worker/seed script bypass "save" entirely)
+platformPriceSchema.pre("findOneAndUpdate", function (next) {
+  const update = this.getUpdate();
+  const data = update.$set || update;
+
+  if (data.originalPrice != null && data.price != null && data.originalPrice > data.price) {
+    data.discountPercent = Math.round(
+      ((data.originalPrice - data.price) / data.originalPrice) * 100
+    );
+  } else if (data.originalPrice != null && data.price != null) {
+    data.discountPercent = 0;
+  }
+
+  // write back into $set if that's where the update lives
+  if (update.$set) {
+    update.$set = data;
+  }
+
+  next();
+});
+
 module.exports = mongoose.model("PlatformPrice", platformPriceSchema);

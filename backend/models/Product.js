@@ -221,4 +221,13 @@ productSchema.virtual("isSkincare").get(function () {
   return this.category === "skincare";
 });
 
+// models/Product.js — add just before module.exports = mongoose.model("Product", productSchema);
+productSchema.post("findOneAndUpdate", async function (doc) {
+  if (!doc) return;
+  const generateAndSaveVerdict = require("../services/ai/verdict.service");
+  generateAndSaveVerdict(doc).catch(err =>
+    console.error(`[verdictGeneration] Failed for product ${doc._id}:`, err.message)
+  );
+});
+
 module.exports = mongoose.model("Product", productSchema);
