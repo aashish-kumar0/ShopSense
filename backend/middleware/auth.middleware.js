@@ -1,5 +1,6 @@
 const jwt= require("jsonwebtoken");
 const User = require("../models/User");
+const redisClient = require("../utils/redisClient")
 
 // protects routes
 
@@ -18,6 +19,14 @@ const protect = async (req,res,next)=>{
             });
         }
 
+        // check blacklisted token before verifying
+        const isBlacklisted = await redisClient.get(`blacklist:${token}`);
+        if (isBlacklisted) {
+            return res.status(401).json({
+                success: false,
+                message: "Session expired - please log in again",
+            });
+        }
 
         // verify signature
         const decoded= jwt.verify(token, process.env.JWT_SECRET);
@@ -46,6 +55,7 @@ const protect = async (req,res,next)=>{
     }
 
     req.user = user;
+    req.token = token;
     next()
     }
     catch(error){

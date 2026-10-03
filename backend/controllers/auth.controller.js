@@ -1,6 +1,7 @@
 const User = require("../models/User")
 const generateToken = require("../utils/generateToken")
-
+const jwt = require("jsonwebtoken")
+const redisClient = require("../utils/redisClient")
 
 
 // Post req-> api/auth/signup
@@ -127,20 +128,42 @@ const login = async (req, res, next) => {
 }
 
 
-    // Get /api/auth/me
-    // returns the currently logged-in user's data
+// Get /api/auth/me
+// returns the currently logged-in user's data
 
-    const getMe = async (req, res, next) => {
-        try {
-            res.status(200).json({
-                success: true,
-                user: req.user,
-            })
-        }
-        catch (error) {
-            next(error)
-        }
+const getMe = async (req, res, next) => {
+    try {
+        res.status(200).json({
+            success: true,
+            user: req.user,
+        })
     }
+    catch (error) {
+        next(error)
+    }
+}
+
+// Post /api/auth/logout
+const logout = async (req, res, next) => {
+    try {
+        const token = req.token;
+
+        // Decode (not verify — protect already verified it) just to read the expiry claim
+        const decoded = jwt.decode(token);
+        const expiresInSeconds = decoded.exp - Math.floor(Date.now() / 1000);
+
+        if (expiresInSeconds > 0) {
+            await redisClient.set(`blacklist:${token}`, "true", "EX", expiresInSeconds);
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Logged out successfully",
+        });
+    } catch (error) {
+        next(error);
+    }
+};
 
 
-module.exports = { signup, login, getMe }
+module.exports = { signup, login, getMe, logout};
