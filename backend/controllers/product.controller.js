@@ -4,6 +4,7 @@ const { detectCategory } = require("../services/ai/categoryDetection.service");
 const { searchOpenFoodFacts } = require("../services/product/openFoodFacts.service");
 const productIngestionQueue = require("../queues/productIngestion.queue");
 const { semanticSearch } = require("../services/rag/rag.service");
+const Verdict = require("../models/Verdict")
 
 // Helper function to increment search counts asynchronously
 const incrementSearchCounts = async (productIds) => {
@@ -110,4 +111,43 @@ const searchProducts = async (req, res) => {
     }
 };
 
-module.exports = { searchProducts };
+
+const getProductById = async(req, res)=>{
+    try{
+        const {id} = req.params;
+
+        const product = await Product.findOne({ _id : id, isDeleted : false})
+        .populate("platformPrices")
+        .lean()
+
+        if(!product){
+            return res.status(404).json({
+                success : false,
+                message : "Product not found",
+            });
+        }
+
+        // Increment search count async, same pattern as searchProducts
+        incrementSearchCounts([product._id]);
+
+        const verdict = await Verdict.findOne({productId : id}).lean();
+
+        return res.status(200).json({
+            success : true,
+            data : {
+                ...product,
+                verdict : verdict ? verdict.verdictText : null,
+            }
+        })
+    }
+    catch(err){
+        console.error("[getProductById]", err);
+        return res.status(500).json({
+            success : false,
+            message : "Something went wrong. Please try again."
+        })
+    }
+
+}
+
+module.exports = { searchProducts, getProductById};

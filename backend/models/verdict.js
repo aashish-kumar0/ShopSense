@@ -16,16 +16,6 @@ const verdictSchema = new mongoose.Schema(
       trim: true,
     },
 
-    pros: {
-      type: [String],
-      default: [],
-    },
-
-    cons: {
-      type: [String],
-      default: [],
-    },
-
     // Hash of specs/ingredients/nutrition used to generate this verdict —
     // regenerate only when this changes
     specsHash: {
